@@ -114,18 +114,9 @@ public class SocketServerTest {
 
                 SelectionKey key = iterator.next();
                 iterator.remove();
-//                selector.selectedKeys().remove(key);
 
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        try {
-                            deal(selector, key);
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }).start();
+                deal(selector, key);
+
 
             }
         }

@@ -1,6 +1,9 @@
 package stream;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 
 /**
  * Created by zhuchunliu on 2017/6/2.

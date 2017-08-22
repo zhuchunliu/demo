@@ -1,8 +1,7 @@
 package stream;
 
-import org.apache.tools.ant.util.StringUtils;
-
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 /**
  * Created by zhuchunliu on 2017/8/11.

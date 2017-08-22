@@ -20,9 +20,9 @@ public class AIOServerTest {
     private void server() throws Exception{
         serverSocketChannel = AsynchronousServerSocketChannel.open();
         serverSocketChannel.bind(new InetSocketAddress(6666));
-        CountDownLatch latch = new CountDownLatch(1);
+        latch = new CountDownLatch(1);
         serverSocketChannel.accept(new ServerHandler(),new ServerHandler());
-        latch.await();
+        latch.await();//阻塞住，要不客户端请求时候，服务端已经关闭了服务；同时还可以监测异常
         System.err.println("服务端出现异常");
         serverSocketChannel.close();
     }

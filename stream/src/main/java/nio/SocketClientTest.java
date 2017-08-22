@@ -3,8 +3,6 @@ package nio;
 import okio.Okio;
 
 import java.io.InputStream;
-import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
