@@ -20,5 +20,7 @@ public class TestP01 {
     public static void main(String[] args) throws Exception{
         new TestP01().init();
         System.err.println(System.getProperty("java.util.logging.manager"));
+        System.err.println("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuv".length());
+        System.err.println(System.getProperty("line.separator"));
     }
 }
