@@ -1,6 +1,7 @@
 package zookeeper;
 
 import org.apache.zookeeper.*;
+import org.apache.zookeeper.data.Stat;
 
 /**
  * Created by zhuchunliu on 2017/3/7.
@@ -8,90 +9,40 @@ import org.apache.zookeeper.*;
 public class ZookeeperTest {
 
 
-    /**
-     * 备注：getChildren.watch 可以监控新的一级子目录【添加】事件；
-     *      当前目录删除[当前path type:NodeDeleted 根目录没有此type事件]
-     *      子目录删除[父类path type:NodeChildrenChanged]
-     *      子目录添加[父类path type:NodeChildrenChanged]
-     *      备注：父类只会触发一次NodeChildrenChanged事件
-     *
-     *
-     *      getData.watch 可以监控当前目录的数据变化
-     *      当前目录的删除[当前path type:NodeDeleted][setData之后，就不会触发delete事件]
-     *      子目录删除没有type时间
-     *
-     * @throws Exception
+    /*
+        Watcher & Version
+        watcher分为两大类：data watches和child watches。getData()和exists()上可以设置data watches，getChildren()上可以设置child watches。
+        setData()会触发data watches;
+        create()会触发data watches和child watches;
+        delete()会触发data watches和child watches.
+        如果对一个不存在的节点调用了exists()，并设置了watcher，而在连接断开的情况下create/delete了该znode，则watcher会丢失。
+        在server端用一个map来存放watcher，所以相同的watcher在map中只会出现一次，只要watcher被回调一次，它就会被删除----map解释了watcher的一次性。
+            比如如果在getData()和exists()上设置的是同一个data watcher，调用setData()会触发data watcher，但是getData()和exists()只有一个会收到通知。
      */
-    private void testZook() throws Exception{
+    private void testZoo() throws Exception{
         ZooKeeper zk = new ZooKeeper("localhost:4180", 50000, new Watcher() {
             @Override
             public void process(WatchedEvent watchedEvent) {
                 System.err.println("节点："+watchedEvent.getPath()+", "+watchedEvent.getType()+" 事件触发了");
             }
         });
+
         zk.create("/testRootPath","testRootData".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        zk.create("/testRootPath/testChildPathOne", "testChildPathOnedDataOne".getBytes(),
-                ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT);
-        zk.create("/testRootPath/testChildPathOne/wanda", "testChildPathOnedDataOneWanda".getBytes(),
-                ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT);
+        Stat stat1 = zk.exists("/testRootPath",true);// 此处不用设置watcher，之前已经设置过了
+//        zk.getChildren("/testRootPath",true);
+//        zk.getData("/testRootPath",true,stat1);
+//        Stat stat = zk.exists("/testRootPath",true);
+//        Stat stat1 = zk.exists("/testRootPath",false);// 此处不用设置watcher，之前已经设置过了
+        zk.setData("/testRootPath","abc".getBytes(),stat1.getVersion());
+        zk.exists("/testRootPath",true);
+        zk.delete("/testRootPath", -1);
 
 
-        // 此处watch：true，只能触发当前目录的变更，添加子目录不会触发
-        System.err.println("获取节点数据: " + new String(zk.getData("/testRootPath", true, null)));
-
-        // 此处wath:true，只能针对当前目录添加Add新的子目录触发，其余不触发，子目录其他事件得自己设置
-        System.err.println("/testRootPath子目录："+zk.getChildren("/testRootPath", true));
-
-        System.err.println("/testRootPath/testChildPathOne子目录："+zk.getChildren("/testRootPath/testChildPathOne", true));
-
-        //只有此处watch设置为true，下面针对该节点的操作才会有watch事件，且没有目录传递作用，只能管理当前目录
-        System.err.println(zk.getChildren("/testRootPath/testChildPathOne/wanda", true));
-
-//        System.err.println("test节点是否存在：" + zk.exists("/test", false));
-
-        //此处会触发watch时间，由于zk.getChildren("/testRootPath",true），watch设置为true了
-        zk.create("/testRootPath/testChildPathTwo","testChildPathTwo".getBytes(),
-                ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-
-        zk.getData("/testRootPath/testChildPathTwo",true,null);
-//        zk.setData("/testRootPath/testChildPathTwo", "two".getBytes(), -1);
-
-        zk.delete("/testRootPath/testChildPathOne/wanda",-1);
-        zk.delete("/testRootPath/testChildPathOne",-1);
-        zk.delete("/testRootPath/testChildPathTwo", -1);
-
-        zk.delete("/testRootPath",-1);
-        zk.close();
-    }
-
-
-    private void testQun() throws Exception{
-        ZooKeeper zk = new ZooKeeper("localhost:4180", 50000, new Watcher() {
-            @Override
-            public void process(WatchedEvent watchedEvent) {
-                System.err.println("节点："+watchedEvent.getPath()+", "+watchedEvent.getType()+" 事件触发了");
-            }
-        });
-
-
-
-        zk.create("/wanda","wanda".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT);
-        zk.create("/wanda/wanda01","wanda01".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT);
-//        zk.getChildren("/wanda/wanda01",true);
-        zk.getChildren("/wanda",true);
-//        zk.getData("/wanda/wanda01",true,null);
-//        zk.getData("/wanda",true,null);
-
-        zk.delete("/wanda/wanda01",-1);
-//        zk.create("/wanda/wanda02","wanda02".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT);
-//        zk.delete("/wanda/wanda02",-1);
-        zk.delete("/wanda",-1);
         zk.close();
 
 
     }
     public static void main(String[] args) throws Exception {
-        new ZookeeperTest().testZook();
-//        new ZookeeperTest().testQun();
+        new ZookeeperTest().testZoo();
     }
 }

@@ -19,28 +19,7 @@ import static java.lang.System.err;
  */
 public class SocketClientTest {
 
-    class CustomThread implements Runnable{
 
-        @Override
-        public void run() {
-            try{
-                Socket socket = new Socket("localhost",5555);
-
-                InputStream stream = socket.getInputStream();
-
-                System.err.println(Thread.currentThread().getName()+" : "+Okio.buffer(Okio.source(stream)).readString(Charset.defaultCharset()));
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-
-        }
-    }
-
-    private void customClient() throws Exception{
-        new Thread(new CustomThread(),"堵塞线程").start();
-//        new Thread(new CustomThread(),"不堵塞线程").start();
-
-    }
 
     private void blockClient() throws Exception{
         SocketChannel channel = SocketChannel.open();
@@ -106,7 +85,6 @@ public class SocketClientTest {
 
     public static void main(String[] args) throws Exception {
         SocketClientTest test = new SocketClientTest();
-//        test.customClient();
 //        test.blockClient();
 
         test.unBlockClient();

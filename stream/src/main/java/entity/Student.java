@@ -1,4 +1,4 @@
-package stream;
+package entity;
 
 import lombok.Data;
 

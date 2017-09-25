@@ -1,9 +1,8 @@
 package jdk8;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import lombok.Data;
+
+import java.util.*;
 
 /**
  * Created by zhuchunliu on 2017/1/17.
@@ -19,7 +18,15 @@ public class DemoLambda {
         }
     }
 
-    public static void main(String[] args) {
+    static void run(){
+        System.err.println("线程");
+    }
+
+    public Runnable getRunnable(){
+        return DemoLambda::run;
+    }
+
+    private void compare_base(){
         List<String> list = Arrays.asList("123","0123","234");
         Collections.sort(list, new Comparator<String>() {
 
@@ -56,6 +63,44 @@ public class DemoLambda {
         DemoInterface demoInterface3 = (agex)->Integer.parseInt(agex+age);
         System.err.println(demoInterface3.getAge("99"));
 
+    }
+
+    protected final Comparator<Student> comparator = (a,b)->a.getName().compareTo(b.getName());
+    protected static int comparex(Student a ,Student b){
+        return a.getName().compareTo(b.getName());
+    }
+    protected static int compare(Student a ,Student b){
+        return a.getName().compareTo(b.getName());
+    }
+
+    public static void main(String[] args) {
+        DemoLambda lambda = new DemoLambda();
+        List list = new ArrayList();
+        list.add(new DemoLambda().new Student("tom",30));
+        list.add(new DemoLambda().new Student("jack",20));
+        list.add(new DemoLambda().new Student("jack",10));
+//        Collections.sort(list,lambda.comparator);
+//        Collections.sort(list, DemoLambda::comparex);
+//        Collections.sort(list, DemoLambda::compare);
+        Collections.sort(list,Comparator.comparing(Student::getName).thenComparing(Student::getAge));
+        for(Object student : list){
+            System.err.println(student.toString());
+        }
+
+        new Thread(lambda.getRunnable()).start();
+
+    }
+
+    @Data
+    class Student{
+        private String name;
+        private Integer age;
+        public Student(String name ,Integer age){
+            this.name = name ;this.age = age;
+        }
+        public String toString(){
+            return this.name+" : "+this.age;
+        }
 
 
     }
